@@ -1,0 +1,33 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+
+spec:
+  replicas: 1
+
+  image:
+    application: confluentinc/cp-kafka:7.6.0
+    init: confluentinc/confluent-init-container:2.9.0
+
+  dataVolumeCapacity: 10Gi
+
+  listeners:
+    external:
+      tls:
+        enabled: true
+        secretRef: kafka-tls
+    internal:
+      tls:
+        enabled: false
+
+  configOverrides:
+    server:
+      - listener.name.external.ssl.keystore.location=/mnt/sslcerts/kafka-tls/keystore.jks
+      - listener.name.external.ssl.truststore.location=/mnt/sslcerts/kafka-tls/truststore.jks
+      - listener.name.external.ssl.keystore.password=confluent
+      - listener.name.external.ssl.key.password=confluent
+      - listener.name.external.ssl.truststore.password=confluent
+      - 'confluent.metrics.reporter.enable=false'
+      - 'metric.reporters=org.apache.kafka.common.metrics.JmxReporter'

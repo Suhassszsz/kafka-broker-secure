@@ -1,0 +1,22 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-kafka:6.2.0
+    init: confluentinc/confluent-init-container:2.2.0
+  dataVolumeCapacity: 5Gi
+  listeners:
+    external:
+      tls:
+        enabled: true
+  configOverrides:
+    server:
+      - sasl.enabled.mechanisms=PLAIN
+      - listener.name.external.sasl.enabled.mechanisms=PLAIN
+      - sasl.mechanism.inter.broker.protocol=PLAIN
+      - inter.broker.listener.name=external
+      - listener.security.protocol.map=EXTERNAL:SASL_SSL,INTERNAL:PLAINTEXT
