@@ -1,0 +1,28 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-kafka:6.2.0
+    init: confluentinc/confluent-init-container:2.2.0
+  dataVolumeCapacity: 5Gi
+
+  listeners:
+    external:
+      tls:
+        enabled: true
+
+  configOverrides:
+    server:
+      - sasl.enabled.mechanisms=GSSAPI
+      - listener.name.external.sasl.enabled.mechanisms=GSSAPI
+      - listener.name.external.sasl.kerberos.service.name=kafka
+      - sasl.mechanism.inter.broker.protocol=GSSAPI
+      - inter.broker.listener.name=EXTERNAL
+      - listener.security.protocol.map=EXTERNAL:SASL_SSL,INTERNAL:PLAINTEXT
+      - sasl.kerberos.service.name=kafka
+      - java.security.auth.login.config=/etc/kafka/secrets/kafka_server_jaas.conf
+      - sasl.jaas.config=com.sun.security.auth.module.Krb5LoginModule required useKeyTab=true storeKey=true keyTab="/etc/kafka/secrets/kafka.keytab" principal="kafka/kafka.confluent.svc.cluster.local@CONFLUENT.SVC.CLUSTER.LOCAL";
